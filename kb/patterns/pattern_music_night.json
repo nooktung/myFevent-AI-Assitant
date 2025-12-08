@@ -1,0 +1,117 @@
+[
+  {
+    "id": "pattern_music_night",
+    "type": "event_pattern",
+    "event_type": "music_night",
+    "name": "Music Night – Đêm nhạc CLB cho sinh viên",
+    "tags": ["music", "concert", "open_mic", "indoor_or_outdoor"],
+    "club_hint": "Phù hợp CLB Âm nhạc, Guitar, Band, hoặc CLB Nghệ thuật.",
+    "difficulty": "medium",
+    "context": "Music Night là đêm nhạc dành cho sinh viên, có thể dạng open-mic hoặc chương trình line-up ca sĩ/band. Quy mô 100–300 người, tổ chức trong hội trường hoặc sân trường. Mục tiêu: tạo sân chơi âm nhạc, showcase band/ca sĩ CLB, gây quỹ hoặc xây dựng thương hiệu CLB.",
+    "epics": [
+      {
+        "epic_key": "program_lineup",
+        "title": "Lên line-up & kịch bản chương trình",
+        "description": "Chọn chủ đề, list bài hát, sắp xếp thứ tự tiết mục, thời lượng.",
+        "department": "program",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 1,
+        "tasks": [
+          {
+            "task_key": "prog_choose_theme",
+            "title": "Chọn chủ đề đêm nhạc",
+            "description": "Ví dụ: Ballad Night, Retro Night, Acoustic Chill,... để định hướng playlist và branding.",
+            "priority": "high",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": false,
+            "suggested_offset_days": -21
+          },
+          {
+            "task_key": "prog_open_registration",
+            "title": "Mở đăng ký tiết mục",
+            "description": "Cho band/ca sĩ đăng ký tiết mục, gửi link audio/video demo, thông tin kỹ thuật.",
+            "priority": "medium",
+            "order_index": 2,
+            "depends_on": ["prog_choose_theme"],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          },
+          {
+            "task_key": "prog_confirm_lineup",
+            "title": "Chốt line-up & thứ tự biểu diễn",
+            "description": "Chọn tiết mục phù hợp, cân bằng tempo, sắp xếp thứ tự để giữ năng lượng khán giả.",
+            "priority": "high",
+            "order_index": 3,
+            "depends_on": ["prog_open_registration"],
+            "can_parallel": false,
+            "suggested_offset_days": -14
+          }
+        ]
+      },
+      {
+        "epic_key": "logistics_stage_sound",
+        "title": "Chuẩn bị sân khấu & âm thanh ánh sáng",
+        "description": "Setup sân khấu, hệ thống âm thanh, ánh sáng phù hợp chủ đề đêm nhạc.",
+        "department": "logistics",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 2,
+        "tasks": [
+          {
+            "task_key": "logi_stage_design",
+            "title": "Thiết kế sân khấu và khu khán giả",
+            "description": "Xác định vị trí sân khấu, loa, đèn, khu vực khán giả đứng/ngồi.",
+            "priority": "medium",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          },
+          {
+            "task_key": "logi_soundcheck_plan",
+            "title": "Lên plan soundcheck",
+            "description": "Sắp xếp thời gian soundcheck cho từng band/tiết mục, test micro, monitor, line in/out.",
+            "priority": "high",
+            "order_index": 2,
+            "depends_on": ["prog_confirm_lineup"],
+            "can_parallel": true,
+            "suggested_offset_days": -7
+          }
+        ]
+      },
+      {
+        "epic_key": "media_promo_music_night",
+        "title": "Truyền thông Music Night",
+        "description": "Thiết kế poster, video teaser, post giới thiệu line-up, kêu gọi sinh viên tham gia.",
+        "department": "media",
+        "phase": "pre_event",
+        "priority": "medium",
+        "order_index": 3,
+        "tasks": [
+          {
+            "task_key": "media_poster",
+            "title": "Thiết kế poster & banner chương trình",
+            "description": "Poster theo chủ đề đêm nhạc, đủ thông tin thời gian, địa điểm, dress code (nếu có).",
+            "priority": "medium",
+            "order_index": 1,
+            "depends_on": ["prog_choose_theme"],
+            "can_parallel": true,
+            "suggested_offset_days": -16
+          },
+          {
+            "task_key": "media_lineup_post",
+            "title": "Post giới thiệu line-up",
+            "description": "Post giới thiệu dần các band/ca sĩ, highlight vài bài nổi bật.",
+            "priority": "medium",
+            "order_index": 2,
+            "depends_on": ["prog_confirm_lineup", "media_poster"],
+            "can_parallel": true,
+            "suggested_offset_days": -10
+          }
+        ]
+      }
+    ]
+  }
+]

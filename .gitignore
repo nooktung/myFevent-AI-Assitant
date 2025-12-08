@@ -1,0 +1,44 @@
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# =========================
+# Tools & cache
+# =========================
+.mypy_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# =========================
+# Env & secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Logs & temp
+# =========================
+logs/
+*.log
+tmp/
+temp/
+
+# =========================
+# Vector DB / index (nếu không muốn commit)
+# =========================
+chroma_db/
+index_db/
+
+# =========================
+# OS / editor junk
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

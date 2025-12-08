@@ -1,0 +1,167 @@
+[
+  {
+    "id": "pattern_workshop_ai",
+    "type": "event_pattern",
+    "event_type": "workshop",
+    "name": "Workshop AI 150-200 người, có livestream",
+    "tags": ["ai", "tech", "workshop", "livestream", "indoor"],
+    "club_hint": "Phù hợp CLB học thuật, CLB công nghệ, CLB AI.",
+    "difficulty": "medium",
+    "context": "Sự kiện workshop chia sẻ về trí tuệ nhân tạo (AI) dành cho sinh viên. Quy mô khoảng 150-200 người, tổ chức trong hội trường, thời lượng 3-4 tiếng. Chương trình bao gồm giới thiệu lý thuyết, demo thực tế, phần hỏi đáp (Q&A) và networking cuối giờ. Mục tiêu: giúp sinh viên hiểu ứng dụng AI, xây dựng hình ảnh chuyên môn cho CLB, và tạo cơ hội kết nối giữa sinh viên - diễn giả - nhà tuyển dụng (nếu có). Đòi hỏi phối hợp chặt giữa Media (truyền thông), Logistics (hội trường, thiết bị), HR (volunteer), Program (kịch bản).",
+    "epics": [
+      {
+        "epic_key": "media_pre_event",
+        "title": "Pré-Event Media Planning",
+        "description": "Lên toàn bộ kế hoạch truyền thông trước sự kiện: concept, KV, content plan, kênh truyền thông, lịch đăng bài.",
+        "department": "media",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 1,
+        "tasks": [
+          {
+            "task_key": "media_brief",
+            "title": "Làm media brief nội bộ",
+            "description": "Tổng hợp mục tiêu truyền thông, chân dung đối tượng, key message, kênh chính, mục tiêu số lượng đăng ký.",
+            "priority": "high",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": false,
+            "suggested_offset_days": -21
+          },
+          {
+            "task_key": "media_kv_design",
+            "title": "Thiết kế key visual & cover",
+            "description": "Thiết kế key visual, cover Facebook, banner cho màn chiếu, template post theo concept thống nhất.",
+            "priority": "high",
+            "order_index": 2,
+            "depends_on": ["media_brief"],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          },
+          {
+            "task_key": "media_form_register",
+            "title": "Tạo form đăng ký người tham gia",
+            "description": "Tạo form đăng ký (Google Form / myFEvent), kiểm tra đầy đủ trường MSSV, ngành, email, số điện thoại.",
+            "priority": "medium",
+            "order_index": 3,
+            "depends_on": ["media_brief"],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          },
+          {
+            "task_key": "media_post_announce",
+            "title": "Viết & đăng bài Post 1 (announce)",
+            "description": "Bài giới thiệu tổng quan sự kiện, diễn giả, nội dung chính, thời gian – địa điểm – link đăng ký.",
+            "priority": "high",
+            "order_index": 4,
+            "depends_on": ["media_kv_design", "media_form_register"],
+            "can_parallel": false,
+            "suggested_offset_days": -14
+          },
+          {
+            "task_key": "media_content_plan",
+            "title": "Lên content plan cho các bài post tiếp theo",
+            "description": "Lên lịch và nội dung các post: giới thiệu diễn giả chi tiết, nội dung từng phần, mini game tăng tương tác, post reminder.",
+            "priority": "medium",
+            "order_index": 5,
+            "depends_on": ["media_brief"],
+            "can_parallel": true,
+            "suggested_offset_days": -16
+          }
+        ]
+      },
+      {
+        "epic_key": "logistics_pre_event",
+        "title": "Chuẩn bị địa điểm & thiết bị",
+        "description": "Đảm bảo hội trường, thiết bị trình chiếu, âm thanh, ánh sáng, nước uống đầy đủ trước ngày diễn ra.",
+        "department": "logistics",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 2,
+        "tasks": [
+          {
+            "task_key": "logi_book_room",
+            "title": "Đặt hội trường và xác nhận lịch",
+            "description": "Làm việc với nhà trường/trung tâm để đặt hội trường đúng khung giờ, xác nhận thời gian mở cửa, thời gian setup.",
+            "priority": "high",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": false,
+            "suggested_offset_days": -20
+          },
+          {
+            "task_key": "logi_equipment_list",
+            "title": "Lập danh sách thiết bị cần dùng",
+            "description": "Liệt kê máy chiếu, loa, micro, dây HDMI, clicker, ổ điện, bàn ghế, standee, backdrop (nếu có).",
+            "priority": "medium",
+            "order_index": 2,
+            "depends_on": ["logi_book_room"],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          },
+          {
+            "task_key": "logi_check_tech_support",
+            "title": "Làm việc với bộ phận kỹ thuật",
+            "description": "Xác nhận có kỹ thuật hỗ trợ, thống nhất giờ test thiết bị, người liên hệ khi có sự cố.",
+            "priority": "medium",
+            "order_index": 3,
+            "depends_on": ["logi_equipment_list"],
+            "can_parallel": true,
+            "suggested_offset_days": -14
+          }
+        ]
+      },
+      {
+        "epic_key": "hr_volunteer",
+        "title": "Tuyển & training volunteer",
+        "description": "Chuẩn bị đội ngũ volunteer hỗ trợ check-in, dẫn khách, hỗ trợ hậu cần trong suốt workshop.",
+        "department": "hr",
+        "phase": "pre_event",
+        "priority": "medium",
+        "order_index": 3,
+        "tasks": [
+          {
+            "task_key": "hr_write_jd",
+            "title": "Viết JD volunteer",
+            "description": "Mô tả vị trí volunteer, yêu cầu cơ bản, khung thời gian cần tham gia.",
+            "priority": "medium",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          },
+          {
+            "task_key": "hr_open_form",
+            "title": "Mở form tuyển volunteer",
+            "description": "Tạo form đăng ký vị trí volunteer, share đến các group CLB/lớp.",
+            "priority": "medium",
+            "order_index": 2,
+            "depends_on": ["hr_write_jd"],
+            "can_parallel": true,
+            "suggested_offset_days": -16
+          },
+          {
+            "task_key": "hr_assign_roles",
+            "title": "Phân công volunteer vào từng vị trí",
+            "description": "Chia volunteer thành nhóm: check-in, hỗ trợ hội trường, hỗ trợ diễn giả, hướng dẫn chỗ ngồi.",
+            "priority": "high",
+            "order_index": 3,
+            "depends_on": ["hr_open_form"],
+            "can_parallel": false,
+            "suggested_offset_days": -10
+          },
+          {
+            "task_key": "hr_training",
+            "title": "Training volunteer",
+            "description": "Tổ chức buổi training để phổ biến kịch bản sự kiện, quy tắc ứng xử, cách xử lý tình huống.",
+            "priority": "high",
+            "order_index": 4,
+            "depends_on": ["hr_assign_roles"],
+            "can_parallel": false,
+            "suggested_offset_days": -7
+          }
+        ]
+      }
+    ]
+  }
+]
