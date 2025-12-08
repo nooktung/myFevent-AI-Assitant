@@ -1,0 +1,117 @@
+[
+  {
+    "id": "pattern_career_fair",
+    "type": "event_pattern",
+    "event_type": "career_fair",
+    "name": "Career Fair – Ngày hội việc làm cho sinh viên",
+    "tags": ["career_fair", "company_booth", "recruitment", "networking"],
+    "club_hint": "Phù hợp phòng CTSV, bộ phận việc làm, hoặc CLB kết nối doanh nghiệp.",
+    "difficulty": "hard",
+    "context": "Career Fair là ngày hội việc làm kết nối sinh viên với doanh nghiệp. Gồm nhiều booth công ty, talkshow chia sẻ nghề nghiệp, khu vực phỏng vấn nhanh. Quy mô 200–500 sinh viên, 10–30 doanh nghiệp tham gia. Mục tiêu: tạo cơ hội thực tập, việc làm, và roadmap nghề nghiệp cho sinh viên.",
+    "epics": [
+      {
+        "epic_key": "sponsor_company_onboarding",
+        "title": "Mời và xác nhận doanh nghiệp tham gia",
+        "description": "Lên danh sách doanh nghiệp mục tiêu, gửi thư mời, follow up và xác nhận booth.",
+        "department": "sponsor",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 1,
+        "tasks": [
+          {
+            "task_key": "sp_list_target_companies",
+            "title": "Lập danh sách doanh nghiệp mục tiêu",
+            "description": "Ưu tiên công ty theo ngành đào tạo của trường (IT, kinh tế, thiết kế, v.v.).",
+            "priority": "high",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": true,
+            "suggested_offset_days": -35
+          },
+          {
+            "task_key": "sp_invitation_email",
+            "title": "Soạn và gửi thư mời doanh nghiệp",
+            "description": "Soạn email/đề nghị chính thức, nêu rõ quyền lợi khi tham gia, layout booth, số lượng sinh viên dự kiến.",
+            "priority": "high",
+            "order_index": 2,
+            "depends_on": ["sp_list_target_companies"],
+            "can_parallel": true,
+            "suggested_offset_days": -32
+          },
+          {
+            "task_key": "sp_follow_up_confirm",
+            "title": "Follow up & xác nhận tham gia",
+            "description": "Gọi điện / email nhắc, chốt danh sách doanh nghiệp, số người, yêu cầu đặc biệt.",
+            "priority": "medium",
+            "order_index": 3,
+            "depends_on": ["sp_invitation_email"],
+            "can_parallel": true,
+            "suggested_offset_days": -25
+          }
+        ]
+      },
+      {
+        "epic_key": "logistics_booth_layout",
+        "title": "Thiết kế layout booth doanh nghiệp",
+        "description": "Sắp xếp vị trí từng booth, khu talkshow, khu phỏng vấn nhanh, khu ăn uống.",
+        "department": "logistics",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 2,
+        "tasks": [
+          {
+            "task_key": "logi_get_hall_map",
+            "title": "Lấy sơ đồ khu vực triển lãm",
+            "description": "Làm việc với trường để xác định diện tích, số bàn ghế, khu vực được phép đặt booth.",
+            "priority": "medium",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": true,
+            "suggested_offset_days": -30
+          },
+          {
+            "task_key": "logi_assign_booth_positions",
+            "title": "Phân vị trí booth cho doanh nghiệp",
+            "description": "Ưu tiên ngành hot, tài trợ chính ở vị trí đẹp; gửi sơ đồ booth cho doanh nghiệp.",
+            "priority": "high",
+            "order_index": 2,
+            "depends_on": ["logi_get_hall_map", "sp_follow_up_confirm"],
+            "can_parallel": false,
+            "suggested_offset_days": -21
+          }
+        ]
+      },
+      {
+        "epic_key": "media_student_marketing",
+        "title": "Truyền thông thu hút sinh viên",
+        "description": "Thông báo danh sách doanh nghiệp, vị trí booth, lịch talkshow để sinh viên chủ động đăng ký.",
+        "department": "media",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 3,
+        "tasks": [
+          {
+            "task_key": "media_announce_companies",
+            "title": "Post giới thiệu doanh nghiệp tham gia",
+            "description": "Làm series post giới thiệu từng doanh nghiệp, vị trí booth, vị trí tuyển dụng chính.",
+            "priority": "high",
+            "order_index": 1,
+            "depends_on": ["sp_follow_up_confirm"],
+            "can_parallel": true,
+            "suggested_offset_days": -20
+          },
+          {
+            "task_key": "media_guide_students",
+            "title": "Post hướng dẫn chuẩn bị CV và cách tham gia",
+            "description": "Hướng dẫn sinh viên chuẩn bị CV, cách dress code, cách tiếp cận doanh nghiệp.",
+            "priority": "medium",
+            "order_index": 2,
+            "depends_on": ["media_announce_companies"],
+            "can_parallel": true,
+            "suggested_offset_days": -15
+          }
+        ]
+      }
+    ]
+  }
+]

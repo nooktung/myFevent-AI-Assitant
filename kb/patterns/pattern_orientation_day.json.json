@@ -1,0 +1,147 @@
+[
+  {
+    "id": "pattern_orientation_day",
+    "type": "event_pattern",
+    "event_type": "orientation",
+    "name": "Orientation Game Day cho tân sinh viên",
+    "tags": ["orientation", "game_day", "freshers", "outdoor"],
+    "club_hint": "Dùng cho chương trình chào tân sinh viên của trường hoặc CLB.",
+    "difficulty": "hard",
+    "context": "Sự kiện Orientation Game Day chào đón tân sinh viên với nhiều khu trò chơi (game station), minigame, booth CLB. Quy mô 200–400 người, có thể tổ chức ngoài trời hoặc trong sảnh lớn. Mục tiêu: giúp tân sinh viên làm quen môi trường, hiểu các CLB, kết bạn mới. Đòi hỏi phối hợp phức tạp giữa Media, Logistics, HR, Program và Sponsor.",
+    "epics": [
+      {
+        "epic_key": "program_design_games",
+        "title": "Thiết kế tuyến game & flow chương trình",
+        "description": "Thiết kế các game station, luật chơi, cách tính điểm, flow di chuyển của tân sinh viên.",
+        "department": "program",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 1,
+        "tasks": [
+          {
+            "task_key": "prog_define_objectives",
+            "title": "Xác định mục tiêu cho hệ thống game",
+            "description": "Định nghĩa mục tiêu: giao lưu, teamwork, hiểu CLB, khám phá campus,... để chọn loại game phù hợp.",
+            "priority": "high",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": false,
+            "suggested_offset_days": -28
+          },
+          {
+            "task_key": "prog_list_games",
+            "title": "Lên danh sách concept game",
+            "description": "Đề xuất nhiều trò chơi đa dạng (vận động, trí tuệ, teamwork) và chọn 5-8 game phù hợp.",
+            "priority": "medium",
+            "order_index": 2,
+            "depends_on": ["prog_define_objectives"],
+            "can_parallel": true,
+            "suggested_offset_days": -24
+          },
+          {
+            "task_key": "prog_write_rules",
+            "title": "Viết rule chi tiết cho từng game",
+            "description": "Viết cách chơi, điều kiện thắng, cách tính điểm, thời lượng, số người tham gia.",
+            "priority": "high",
+            "order_index": 3,
+            "depends_on": ["prog_list_games"],
+            "can_parallel": false,
+            "suggested_offset_days": -21
+          },
+          {
+            "task_key": "prog_flow_map",
+            "title": "Thiết kế flow di chuyển giữa các game",
+            "description": "Thiết kế sơ đồ di chuyển để tránh tắc nghẽn, đảm bảo các nhóm chia đều cho các game.",
+            "priority": "medium",
+            "order_index": 4,
+            "depends_on": ["prog_write_rules"],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          }
+        ]
+      },
+      {
+        "epic_key": "logistics_layout",
+        "title": "Thiết kế layout khu vực & đạo cụ game",
+        "description": "Chuẩn bị mặt bằng, đạo cụ, biển chỉ dẫn, standee cho các game station.",
+        "department": "logistics",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 2,
+        "tasks": [
+          {
+            "task_key": "logi_get_map",
+            "title": "Lấy sơ đồ khu vực tổ chức",
+            "description": "Làm việc với trường để lấy sơ đồ sảnh/khu vực, xác định cổng ra vào, khu tránh mưa.",
+            "priority": "medium",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": true,
+            "suggested_offset_days": -24
+          },
+          {
+            "task_key": "logi_draw_layout",
+            "title": "Vẽ layout vị trí các game station",
+            "description": "Xác định vị trí từng game station, khu check-in, khu chụp ảnh, khu nghỉ.",
+            "priority": "high",
+            "order_index": 2,
+            "depends_on": ["logi_get_map"],
+            "can_parallel": false,
+            "suggested_offset_days": -21
+          },
+          {
+            "task_key": "logi_props_list",
+            "title": "Lập danh sách đạo cụ cho từng game",
+            "description": "Từ rule các game, liệt kê đạo cụ, số lượng, ưu tiên mượn/thuê/mua.",
+            "priority": "medium",
+            "order_index": 3,
+            "depends_on": ["logi_draw_layout"],
+            "can_parallel": true,
+            "suggested_offset_days": -18
+          }
+        ]
+      },
+      {
+        "epic_key": "hr_game_masters",
+        "title": "Tuyển & training game master/volunteer",
+        "description": "Chuẩn bị đội ngũ đứng tại các game station, hướng dẫn luật và quản lý dòng người.",
+        "department": "hr",
+        "phase": "pre_event",
+        "priority": "high",
+        "order_index": 3,
+        "tasks": [
+          {
+            "task_key": "hr_define_roles",
+            "title": "Xác định các vai trò nhân sự cần có",
+            "description": "Game master, check-in, dẫn đường, hỗ trợ y tế, hậu cần, MC phụ.",
+            "priority": "medium",
+            "order_index": 1,
+            "depends_on": [],
+            "can_parallel": true,
+            "suggested_offset_days": -24
+          },
+          {
+            "task_key": "hr_recruit",
+            "title": "Tuyển volunteer cho từng vai trò",
+            "description": "Mở form tuyển, share vào các group lớp và CLB, gọi nội bộ CLB hỗ trợ.",
+            "priority": "medium",
+            "order_index": 2,
+            "depends_on": ["hr_define_roles"],
+            "can_parallel": true,
+            "suggested_offset_days": -21
+          },
+          {
+            "task_key": "hr_training_session",
+            "title": "Tổ chức buổi training",
+            "description": "Giới thiệu flow chương trình, hướng dẫn luật các game, phân nhóm đứng tại từng station.",
+            "priority": "high",
+            "order_index": 3,
+            "depends_on": ["hr_recruit"],
+            "can_parallel": false,
+            "suggested_offset_days": -14
+          }
+        ]
+      }
+    ]
+  }
+]
