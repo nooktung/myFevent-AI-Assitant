@@ -8,7 +8,7 @@ import requests
 
 load_dotenv()
 
-MYFEVENT_BASE_URL = os.getenv("MYFEVENT_BASE_URL", "http://localhost:5000/api")
+MYFEVENT_BASE_URL = os.getenv("MYFEVENT_BASE_URL", "http://localhost:8080/api")
 SERVICE_API_KEY = os.getenv("MYFEVENT_API_KEY", "")
 
 # Retry configuration
