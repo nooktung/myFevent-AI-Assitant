@@ -69,11 +69,42 @@ def get_event_detail_for_ai_tool(
             return data
 
         return result
+    except ValueError as e:
+        # ValueError từ node_client đã có thông tin chi tiết, chỉ cần re-raise
+        raise
     except Exception as e:
         # Log chi tiết để debug
-        print(f"[ERROR] get_event_detail_for_ai_tool failed: {e}")
-        print(f"[ERROR] eventId: {event_id}")
-        print(f"[ERROR] user_token present: {user_token is not None}")
-        raise
+        error_type = type(e).__name__
+        error_message = str(e)
+        
+        print(f"[ERROR] get_event_detail_for_ai_tool failed:")
+        print(f"  - Error type: {error_type}")
+        print(f"  - Error message: {error_message}")
+        print(f"  - eventId: {event_id}")
+        print(f"  - user_token present: {user_token is not None}")
+        
+        # Tạo error message chi tiết hơn
+        if "timeout" in error_message.lower() or "connection" in error_message.lower():
+            raise ValueError(
+                f"Không thể kết nối đến backend để lấy thông tin sự kiện. "
+                f"Nguyên nhân có thể: backend chưa khởi động, mạng không ổn định, hoặc quá thời gian chờ. "
+                f"Vui lòng kiểm tra kết nối và thử lại sau. Chi tiết: {error_message}"
+            )
+        elif "401" in error_message or "authentication" in error_message.lower():
+            raise ValueError(
+                f"Lỗi xác thực khi lấy thông tin sự kiện. Token có thể đã hết hạn hoặc không hợp lệ. "
+                f"Vui lòng đăng nhập lại. Chi tiết: {error_message}"
+            )
+        elif "404" in error_message or "not found" in error_message.lower():
+            raise ValueError(
+                f"Không tìm thấy sự kiện với ID: {event_id}. "
+                f"Vui lòng kiểm tra lại eventId hoặc đảm bảo bạn có quyền truy cập sự kiện này. "
+                f"Chi tiết: {error_message}"
+            )
+        else:
+            raise ValueError(
+                f"Lỗi khi lấy thông tin sự kiện: {error_message}. "
+                f"Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục."
+            )
 
 

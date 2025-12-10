@@ -280,30 +280,89 @@ def run_agent_turn(
                             **tool_result,
                         }
                     )
-            except Exception as e:
-                import traceback
-                error_detail = traceback.format_exc()
-                print(f"[AGENT] tool {tool_name} error:")
-                print(error_detail)
+            except ValueError as e:
+                # ValueError từ tools thường chứa thông tin lỗi chi tiết
+                error_message = str(e)
+                error_type = "VALUE_ERROR"
                 
-                # Tạo suggestion dựa trên tool name
-                if tool_name == "create_event":
-                    suggestion = "Vui lòng kiểm tra lại: tên sự kiện, đơn vị tổ chức, ngày bắt đầu/kết thúc (format yyyy-mm-dd), địa điểm, và loại sự kiện (public/private)."
-                elif tool_name == "ai_generate_tasks_for_epic":
-                    suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, epicId, department, eventDescription, eventStartDate) và thử lại."
+                # Phân tích error message để xác định loại lỗi cụ thể
+                if "timeout" in error_message.lower() or "quá thời gian chờ" in error_message.lower():
+                    error_type = "TIMEOUT_ERROR"
+                    suggestion = "Kết nối đến backend quá thời gian chờ. Vui lòng thử lại sau hoặc kiểm tra kết nối mạng."
+                elif "connection" in error_message.lower() or "kết nối" in error_message.lower():
+                    error_type = "CONNECTION_ERROR"
+                    suggestion = "Không thể kết nối đến backend. Vui lòng kiểm tra xem backend có đang chạy không hoặc thử lại sau."
+                elif "authentication" in error_message.lower() or "401" in error_message or "xác thực" in error_message.lower():
+                    error_type = "AUTHENTICATION_ERROR"
+                    suggestion = "Token xác thực không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại."
+                elif "permission" in error_message.lower() or "403" in error_message or "quyền" in error_message.lower():
+                    error_type = "PERMISSION_ERROR"
+                    suggestion = "Bạn không có quyền thực hiện thao tác này. Vui lòng kiểm tra quyền của bạn."
+                elif "not found" in error_message.lower() or "404" in error_message or "không tìm thấy" in error_message.lower():
+                    error_type = "NOT_FOUND_ERROR"
+                    suggestion = "Không tìm thấy tài nguyên yêu cầu. Vui lòng kiểm tra lại ID hoặc thông tin đã cung cấp."
+                elif "missing" in error_message.lower() or "thiếu" in error_message.lower():
+                    error_type = "MISSING_FIELD_ERROR"
+                    suggestion = "Thiếu thông tin bắt buộc. Vui lòng kiểm tra lại các trường cần thiết."
+                elif "invalid" in error_message.lower() or "không hợp lệ" in error_message.lower():
+                    error_type = "VALIDATION_ERROR"
+                    suggestion = "Thông tin không hợp lệ. Vui lòng kiểm tra lại format hoặc giá trị đã nhập."
                 else:
-                    suggestion = "Vui lòng kiểm tra lại các tham số đầu vào và thử lại."
+                    # Tạo suggestion dựa trên tool name
+                    if tool_name == "create_event":
+                        suggestion = "Vui lòng kiểm tra lại: tên sự kiện, đơn vị tổ chức, ngày bắt đầu/kết thúc (format yyyy-mm-dd), địa điểm, và loại sự kiện (public/private)."
+                    elif tool_name == "get_event_detail_for_ai":
+                        suggestion = "Vui lòng kiểm tra lại eventId hoặc thử lại sau. Nếu vấn đề vẫn tiếp tục, có thể backend đang gặp sự cố."
+                    elif tool_name == "ai_generate_tasks_for_epic":
+                        suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, epicId, department, eventDescription, eventStartDate) và thử lại."
+                    elif tool_name == "ai_generate_epics_for_event":
+                        suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, eventDescription, departments) và thử lại."
+                    else:
+                        suggestion = "Vui lòng kiểm tra lại các tham số đầu vào và thử lại."
+                
+                print(f"[AGENT] tool {tool_name} error ({error_type}): {error_message}")
                 
                 # Trả về error message chi tiết để LLM có thể xử lý
                 # Format này giúp AI dễ đọc và hiển thị lỗi cho người dùng
                 tool_result = {
                     "error": True,
-                    "error_message": str(e),
-                    "error_type": type(e).__name__,
+                    "error_type": error_type,
+                    "error_message": error_message,
                     "suggestion": suggestion,
                     "tool_name": tool_name,
                     "tool_args": tool_args if 'tool_args' in locals() else {},
-                    "message": f"Tool {tool_name} failed: {str(e)}. {suggestion}"
+                    "message": f"Lỗi khi thực hiện {tool_name}: {error_message}. {suggestion}"
+                }
+            except Exception as e:
+                import traceback
+                error_detail = traceback.format_exc()
+                error_message = str(e)
+                error_type = type(e).__name__
+                
+                print(f"[AGENT] tool {tool_name} error ({error_type}):")
+                print(error_detail)
+                
+                # Tạo suggestion dựa trên tool name và error type
+                if tool_name == "create_event":
+                    suggestion = "Vui lòng kiểm tra lại: tên sự kiện, đơn vị tổ chức, ngày bắt đầu/kết thúc (format yyyy-mm-dd), địa điểm, và loại sự kiện (public/private)."
+                elif tool_name == "get_event_detail_for_ai":
+                    suggestion = "Vui lòng kiểm tra lại eventId hoặc thử lại sau. Nếu vấn đề vẫn tiếp tục, có thể backend đang gặp sự cố."
+                elif tool_name == "ai_generate_tasks_for_epic":
+                    suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, epicId, department, eventDescription, eventStartDate) và thử lại."
+                elif tool_name == "ai_generate_epics_for_event":
+                    suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, eventDescription, departments) và thử lại."
+                else:
+                    suggestion = "Vui lòng kiểm tra lại các tham số đầu vào và thử lại."
+                
+                # Trả về error message chi tiết để LLM có thể xử lý
+                tool_result = {
+                    "error": True,
+                    "error_type": error_type,
+                    "error_message": error_message,
+                    "suggestion": suggestion,
+                    "tool_name": tool_name,
+                    "tool_args": tool_args if 'tool_args' in locals() else {},
+                    "message": f"Lỗi không mong đợi khi thực hiện {tool_name}: {error_message}. {suggestion}"
                 }
 
             # Tool result để model “nhìn thấy” ở vòng lặp kế tiếp
