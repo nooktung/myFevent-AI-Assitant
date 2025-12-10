@@ -16,11 +16,13 @@ class Message(BaseModel):
 
 class TurnRequest(BaseModel):
     history_messages: List[Message]
+    eventId: Optional[str] = None  # Optional: eventId nếu đang ở trong context của một sự kiện
 
 class TurnResponse(BaseModel):
     assistant_reply: str
     messages: List[Dict[str, Any]]
     plans: Optional[List[Dict[str, Any]]] = None  # Thêm plans vào response model
+    eventId: Optional[str] = None  # Trả lại eventId để Node backend có thể lưu lịch sử
 
 
 # ====== FastAPI app ======
@@ -56,16 +58,35 @@ async def event_planner_turn(
     - Lấy JWT từ header Authorization → truyền vào run_agent_turn
     - Trả về assistant_reply + full messages (để FE render lại)
     """
+    # Log request để debug
+    print(f"[FastAPI] Received request: {len(payload.history_messages)} messages, eventId={payload.eventId}")
+    
     if not authorization or not authorization.startswith("Bearer "):
+        print("[FastAPI] ERROR: Missing or invalid Authorization header")
         raise HTTPException(
             status_code=401,
-            detail="Missing or invalid Authorization header",
+            detail="Missing or invalid Authorization header. Please provide a valid Bearer token.",
         )
 
     user_token = authorization.split(" ", 1)[1].strip()
+    
+    # Validate token không rỗng
+    if not user_token:
+        print("[FastAPI] ERROR: Empty token after Bearer prefix")
+        raise HTTPException(
+            status_code=401,
+            detail="Empty authorization token",
+        )
+    
+    print(f"[FastAPI] Token prefix: {user_token[:20]}...")
 
     # Chuyển Pydantic models → dict cho agent_core
     history = [m.model_dump() for m in payload.history_messages]
+    
+    # Log để debug lịch sử
+    print(f"[FastAPI] History messages count: {len(history)}")
+    if history:
+        print(f"[FastAPI] First message role: {history[0].get('role')}")
 
     try:
         result = run_agent_turn(
@@ -83,6 +104,13 @@ async def event_planner_turn(
             result["messages"] = []
         if "plans" not in result:
             result["plans"] = []
+        
+        print(f"[FastAPI] Success: assistant_reply length={len(result.get('assistant_reply', ''))}, plans count={len(result.get('plans', []))}")
+        
+        # Thêm eventId vào response để Node backend có thể lưu lịch sử đúng cách
+        if payload.eventId:
+            result["eventId"] = payload.eventId
+            print(f"[FastAPI] Including eventId in response: {payload.eventId}")
             
     except HTTPException:
         # Re-raise HTTP exceptions as-is
@@ -90,7 +118,7 @@ async def event_planner_turn(
     except Exception as e:
         # Log full traceback for debugging
         error_traceback = traceback.format_exc()
-        print(f"[FastAPI] Error in event_planner_turn:")
+        print(f"[FastAPI] ERROR in event_planner_turn:")
         print(error_traceback)
         
         # Return more detailed error message

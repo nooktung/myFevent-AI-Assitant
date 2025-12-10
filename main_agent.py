@@ -53,11 +53,11 @@ TOOLS = [
                     },
                     "eventStartDate": {
                         "type": "string",
-                        "description": "Ngày bắt đầu sự kiện, yyyy-mm-dd."
+                        "description": "Ngày bắt đầu diễn ra sự kiện (D-Day - ngày đầu tiên sự kiện chính thức diễn ra), định dạng yyyy-mm-dd."
                     },
                     "eventEndDate": {
                         "type": "string",
-                        "description": "Ngày kết thúc sự kiện, yyyy-mm-dd."
+                        "description": "Ngày kết thúc diễn ra sự kiện (ngày cuối cùng sự kiện chính thức diễn ra), định dạng yyyy-mm-dd."
                     },
                     "location": {
                         "type": "string",
@@ -158,7 +158,7 @@ TOOLS = [
                     },
                     "eventStartDate": {
                         "type": "string",
-                        "description": "Ngày bắt đầu sự kiện, yyyy-mm-dd."
+                        "description": "Ngày bắt đầu diễn ra sự kiện (D-Day - ngày đầu tiên sự kiện chính thức diễn ra), định dạng yyyy-mm-dd. Đây là mốc tham chiếu để tính toán offset_days_from_event cho các task."
                     }
                 },
                 "required": ["eventId", "epicId", "epicTitle", "department"]

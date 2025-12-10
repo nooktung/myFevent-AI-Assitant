@@ -34,11 +34,11 @@ TOOLS = [
                     "organizerName": {"type": "string"},
                     "eventStartDate": {
                         "type": "string",
-                        "description": "Ngày bắt đầu sự kiện, định dạng yyyy-mm-dd"
+                        "description": "Ngày bắt đầu diễn ra sự kiện (D-Day - ngày đầu tiên sự kiện chính thức diễn ra), định dạng yyyy-mm-dd. Đây là mốc tham chiếu để tính toán thời gian cho các công việc chuẩn bị (offset_days_from_event < 0) và hậu kỳ (offset_days_from_event > 0)."
                     },
                     "eventEndDate": {
                         "type": "string",
-                        "description": "Ngày kết thúc sự kiện, định dạng yyyy-mm-dd"
+                        "description": "Ngày kết thúc diễn ra sự kiện (ngày cuối cùng sự kiện chính thức diễn ra), định dạng yyyy-mm-dd."
                     },
                     "location": {"type": "string"},
                     "type": {
@@ -70,7 +70,12 @@ TOOLS = [
             "description": (
                 "Lấy thông tin chi tiết của một sự kiện trong hệ thống myFEvent, "
                 "bao gồm event, danh sách phòng ban, số lượng thành viên, EPIC và TASK hiện có. "
-                "Dùng tool này trước khi sinh EPIC/TASK nếu đã biết eventId."
+                "Dùng tool này trước khi sinh EPIC/TASK nếu đã biết eventId. "
+                "QUAN TRỌNG: Response sẽ chứa 'currentUser' với field 'role' (HoOC, HoD, hoặc Member). "
+                "BẮT BUỘC phải kiểm tra currentUser.role trước khi tạo task/epic: "
+                "- Nếu role là 'Member': KHÔNG được phép tạo task/epic, trả lời rằng chỉ HoOC và HoD mới có quyền. "
+                "- Nếu role là 'HoD': Chỉ được tạo task trong epic của ban mình, KHÔNG được tạo epic mới. "
+                "- Nếu role là 'HoOC': Có thể tạo cả epic và task cho bất kỳ ban nào."
             ),
             "parameters": {
                 "type": "object",
@@ -151,7 +156,7 @@ TOOLS = [
                     },
                     "eventStartDate": {
                         "type": "string",
-                        "description": "Ngày bắt đầu sự kiện, định dạng yyyy-mm-dd"
+                        "description": "Ngày bắt đầu diễn ra sự kiện (D-Day - ngày đầu tiên sự kiện chính thức diễn ra), định dạng yyyy-mm-dd. Đây là mốc tham chiếu để tính toán offset_days_from_event cho các task."
                     }
                 },
                 "required": [
@@ -280,12 +285,25 @@ def run_agent_turn(
                 error_detail = traceback.format_exc()
                 print(f"[AGENT] tool {tool_name} error:")
                 print(error_detail)
+                
+                # Tạo suggestion dựa trên tool name
+                if tool_name == "create_event":
+                    suggestion = "Vui lòng kiểm tra lại: tên sự kiện, đơn vị tổ chức, ngày bắt đầu/kết thúc (format yyyy-mm-dd), địa điểm, và loại sự kiện (public/private)."
+                elif tool_name == "ai_generate_tasks_for_epic":
+                    suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, epicId, department, eventDescription, eventStartDate) và thử lại."
+                else:
+                    suggestion = "Vui lòng kiểm tra lại các tham số đầu vào và thử lại."
+                
                 # Trả về error message chi tiết để LLM có thể xử lý
+                # Format này giúp AI dễ đọc và hiển thị lỗi cho người dùng
                 tool_result = {
                     "error": True,
                     "error_message": str(e),
                     "error_type": type(e).__name__,
-                    "suggestion": "Vui lòng kiểm tra lại các tham số đầu vào (eventId, epicId, department, eventDescription, eventStartDate) và thử lại."
+                    "suggestion": suggestion,
+                    "tool_name": tool_name,
+                    "tool_args": tool_args if 'tool_args' in locals() else {},
+                    "message": f"Tool {tool_name} failed: {str(e)}. {suggestion}"
                 }
 
             # Tool result để model “nhìn thấy” ở vòng lặp kế tiếp

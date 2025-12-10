@@ -37,9 +37,24 @@ def _build_headers(
 def post(path: str, json: dict, user_token: Optional[str] = None):
     base = MYFEVENT_BASE_URL.rstrip("/")
     url = f"{base}/{path.lstrip('/')}"
-    resp = requests.post(url, json=json, headers=_build_headers(user_token=user_token))
-    resp.raise_for_status()
-    return resp.json()
+    try:
+        resp = requests.post(url, json=json, headers=_build_headers(user_token=user_token))
+        resp.raise_for_status()
+        return resp.json()
+    except requests.exceptions.HTTPError as e:
+        # Lấy thông tin chi tiết từ response body nếu có
+        error_detail = str(e)
+        try:
+            if e.response is not None:
+                error_body = e.response.json()
+                if isinstance(error_body, dict):
+                    error_msg = error_body.get("message") or error_body.get("error") or str(error_body)
+                    error_detail = f"{error_msg} (HTTP {e.response.status_code})"
+        except:
+            pass
+        raise ValueError(f"Backend API error: {error_detail}")
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"Network error when calling backend: {str(e)}")
 
 
 def get(path: str, params: Optional[dict] = None, user_token: Optional[str] = None):
