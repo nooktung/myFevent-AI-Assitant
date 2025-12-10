@@ -10,6 +10,12 @@ def create_event_tool(args: Dict[str, Any], user_token: Optional[str] = None) ->
     user_token: JWT của user (để Node set req.user.id, EventMember HoOC, ...).
     """
 
+    # Xử lý images: nếu không có thì dùng default image
+    images = args.get("images") or []
+    if not images or (isinstance(images, list) and len(images) == 0):
+        # Default image URL cho sự kiện (có thể thay bằng URL ảnh mặc định của hệ thống)
+        images = ["https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800"]
+    
     payload: Dict[str, Any] = {
         "name": args.get("name"),
         "description": args.get("description") or "",
@@ -18,7 +24,7 @@ def create_event_tool(args: Dict[str, Any], user_token: Optional[str] = None) ->
         "eventEndDate": args.get("eventEndDate"),
         "location": args.get("location") or "",
         "type": args.get("type") or "private",  # 'public' | 'private'
-        "images": args.get("images") or [],
+        "images": images,
     }
 
     # Validate tối thiểu
@@ -35,20 +41,46 @@ def create_event_tool(args: Dict[str, Any], user_token: Optional[str] = None) ->
         missing.append("location")
 
     if missing:
-        raise ValueError(f"Missing required fields for createEvent: {', '.join(missing)}")
+        # Chuyển đổi tên field sang tiếng Việt
+        field_names = {
+            "name": "tên sự kiện",
+            "organizerName": "đơn vị tổ chức",
+            "eventStartDate": "ngày bắt đầu",
+            "eventEndDate": "ngày kết thúc",
+            "location": "địa điểm"
+        }
+        missing_vn = [field_names.get(f, f) for f in missing]
+        raise ValueError(f"Thiếu thông tin bắt buộc: {', '.join(missing_vn)}. Vui lòng cung cấp đầy đủ thông tin.")
 
     # Validate format ngày tháng (yyyy-mm-dd)
     import re
     date_pattern = r'^\d{4}-\d{2}-\d{2}$'
     if payload["eventStartDate"] and not re.match(date_pattern, payload["eventStartDate"]):
-        raise ValueError(f"Invalid date format for eventStartDate: '{payload['eventStartDate']}'. Expected format: yyyy-mm-dd (e.g., 2026-03-05)")
+        raise ValueError(f"Định dạng ngày bắt đầu không hợp lệ: '{payload['eventStartDate']}'. Vui lòng sử dụng định dạng yyyy-mm-dd (ví dụ: 2025-05-06).")
     if payload["eventEndDate"] and not re.match(date_pattern, payload["eventEndDate"]):
-        raise ValueError(f"Invalid date format for eventEndDate: '{payload['eventEndDate']}'. Expected format: yyyy-mm-dd (e.g., 2026-03-14)")
+        raise ValueError(f"Định dạng ngày kết thúc không hợp lệ: '{payload['eventEndDate']}'. Vui lòng sử dụng định dạng yyyy-mm-dd (ví dụ: 2025-05-11).")
 
+    # Log để debug
+    print(f"[create_event_tool] Creating event with payload:")
+    print(f"  - name: {payload.get('name')}")
+    print(f"  - organizerName: {payload.get('organizerName')}")
+    print(f"  - eventStartDate: {payload.get('eventStartDate')}")
+    print(f"  - eventEndDate: {payload.get('eventEndDate')}")
+    print(f"  - location: {payload.get('location')}")
+    print(f"  - type: {payload.get('type')}")
+    print(f"  - images: {payload.get('images')}")
+    print(f"  - has_token: {bool(user_token)}")
+    print(f"  - token_prefix: {user_token[:20] + '...' if user_token else 'None'}")
+    
     try:
         return post("/events", json=payload, user_token=user_token)
     except ValueError as e:
         # Re-raise ValueError với message rõ ràng hơn
+        print(f"[create_event_tool] ValueError: {str(e)}")
         raise ValueError(str(e))
     except Exception as e:
-        raise ValueError(f"Error creating event: {str(e)}")
+        print(f"[create_event_tool] Exception: {str(e)}")
+        # Nếu đã là ValueError thì giữ nguyên message, nếu không thì wrap lại
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Không thể tạo sự kiện. {str(e)}")

@@ -83,28 +83,27 @@ def get_event_detail_for_ai_tool(
         print(f"  - eventId: {event_id}")
         print(f"  - user_token present: {user_token is not None}")
         
-        # Tạo error message chi tiết hơn
-        if "timeout" in error_message.lower() or "connection" in error_message.lower():
+        # Tạo error message tự nhiên, không hiển thị mã lỗi kỹ thuật
+        if "timeout" in error_message.lower() or "connection" in error_message.lower() or "kết nối" in error_message.lower():
             raise ValueError(
-                f"Không thể kết nối đến backend để lấy thông tin sự kiện. "
-                f"Nguyên nhân có thể: backend chưa khởi động, mạng không ổn định, hoặc quá thời gian chờ. "
-                f"Vui lòng kiểm tra kết nối và thử lại sau. Chi tiết: {error_message}"
+                "Không thể kết nối đến hệ thống để lấy thông tin sự kiện. "
+                "Nguyên nhân có thể do mạng không ổn định hoặc hệ thống đang quá tải. "
+                "Vui lòng kiểm tra kết nối và thử lại sau."
             )
-        elif "401" in error_message or "authentication" in error_message.lower():
+        elif "authentication" in error_message.lower() or "xác thực" in error_message.lower() or "hết hạn" in error_message.lower():
             raise ValueError(
-                f"Lỗi xác thực khi lấy thông tin sự kiện. Token có thể đã hết hạn hoặc không hợp lệ. "
-                f"Vui lòng đăng nhập lại. Chi tiết: {error_message}"
+                "Phiên đăng nhập của bạn đã hết hạn hoặc không hợp lệ. "
+                "Vui lòng đăng nhập lại để tiếp tục."
             )
-        elif "404" in error_message or "not found" in error_message.lower():
+        elif "not found" in error_message.lower() or "không tìm thấy" in error_message.lower():
             raise ValueError(
-                f"Không tìm thấy sự kiện với ID: {event_id}. "
-                f"Vui lòng kiểm tra lại eventId hoặc đảm bảo bạn có quyền truy cập sự kiện này. "
-                f"Chi tiết: {error_message}"
+                f"Không tìm thấy sự kiện với ID đã cung cấp. "
+                "Vui lòng kiểm tra lại ID sự kiện hoặc đảm bảo bạn có quyền truy cập sự kiện này."
             )
         else:
             raise ValueError(
-                f"Lỗi khi lấy thông tin sự kiện: {error_message}. "
-                f"Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục."
+                "Không thể lấy thông tin sự kiện. "
+                "Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục."
             )
 
 

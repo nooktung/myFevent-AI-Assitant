@@ -96,7 +96,21 @@ def _post_internal(path: str, json: dict, user_token: Optional[str] = None):
     """Internal function để thực hiện POST request (không có retry)."""
     base = MYFEVENT_BASE_URL.rstrip("/")
     url = f"{base}/{path.lstrip('/')}"
-    resp = requests.post(url, json=json, headers=_build_headers(user_token=user_token), timeout=30)
+    headers = _build_headers(user_token=user_token)
+    print(f"[node_client] POST request to: {url}")
+    print(f"[node_client] Base URL: {MYFEVENT_BASE_URL}")
+    print(f"[node_client] Path: {path}")
+    print(f"[node_client] Payload keys: {list(json.keys()) if json else 'None'}")
+    print(f"[node_client] Has Authorization header: {'Authorization' in headers}")
+    print(f"[node_client] Authorization prefix: {headers.get('Authorization', '')[:30]}..." if headers.get('Authorization') else "[node_client] No Authorization header")
+    resp = requests.post(url, json=json, headers=headers, timeout=30)
+    print(f"[node_client] Response status: {resp.status_code}")
+    if resp.status_code >= 400:
+        try:
+            error_body = resp.json()
+            print(f"[node_client] Error response body: {error_body}")
+        except:
+            print(f"[node_client] Error response text: {resp.text[:200]}")
     resp.raise_for_status()
     return resp.json()
 
@@ -109,42 +123,59 @@ def post(path: str, json: dict, user_token: Optional[str] = None):
     try:
         return _retry_request(_post_internal, path, json, user_token=user_token)
     except requests.exceptions.Timeout as e:
-        raise ValueError(f"Kết nối đến backend quá thời gian chờ (timeout). URL: {url}. Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.")
+        raise ValueError("Kết nối đến hệ thống quá thời gian chờ. Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.")
     except requests.exceptions.ConnectionError as e:
-        raise ValueError(f"Không thể kết nối đến backend tại {base}. Vui lòng kiểm tra xem backend có đang chạy không. Chi tiết: {str(e)}")
+        raise ValueError("Không thể kết nối đến hệ thống. Vui lòng kiểm tra xem hệ thống có đang hoạt động không hoặc thử lại sau.")
     except requests.exceptions.HTTPError as e:
         # Lấy thông tin chi tiết từ response body nếu có
-        error_detail = str(e)
-        error_type = "HTTP_ERROR"
+        error_message = ""
         suggestion = "Vui lòng kiểm tra lại thông tin yêu cầu hoặc thử lại sau."
         
         try:
             if e.response is not None:
                 error_body = e.response.json() if e.response.content else {}
                 if isinstance(error_body, dict):
-                    error_msg = error_body.get("message") or error_body.get("error") or str(error_body)
-                    error_detail = f"{error_msg} (HTTP {e.response.status_code})"
+                    backend_msg = error_body.get("message") or error_body.get("error") or ""
                     
-                    # Phân loại lỗi và đưa ra gợi ý cụ thể
+                    # Phân loại lỗi và đưa ra thông báo tự nhiên
                     status_code = e.response.status_code
-                    if status_code == 401:
-                        error_type = "AUTHENTICATION_ERROR"
-                        suggestion = "Token xác thực không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại."
+                    if status_code == 400:
+                        # Lỗi validation - hiển thị message từ backend một cách tự nhiên
+                        if backend_msg:
+                            if "Ảnh sự kiện là bắt buộc" in backend_msg or "image" in backend_msg.lower():
+                                error_message = "Vui lòng cung cấp ảnh sự kiện hoặc để hệ thống tự động sử dụng ảnh mặc định."
+                            elif "ngày" in backend_msg.lower() or "date" in backend_msg.lower():
+                                if "Ngày kết thúc" in backend_msg:
+                                    error_message = "Ngày kết thúc phải sau ngày bắt đầu. Vui lòng kiểm tra lại ngày tháng."
+                                elif "phải là ngày hôm nay" in backend_msg:
+                                    error_message = "Ngày bắt đầu và ngày kết thúc phải là ngày hôm nay hoặc trong tương lai. Vui lòng chọn lại ngày phù hợp."
+                                else:
+                                    error_message = "Ngày tháng không hợp lệ. Vui lòng kiểm tra lại định dạng ngày tháng (ví dụ: 2025-05-06)."
+                            elif "missing" in backend_msg.lower() or "required" in backend_msg.lower() or "thiếu" in backend_msg.lower():
+                                error_message = "Thiếu thông tin bắt buộc. Vui lòng cung cấp đầy đủ thông tin."
+                            else:
+                                error_message = backend_msg if backend_msg else "Thông tin không hợp lệ. Vui lòng kiểm tra lại các trường đã nhập."
+                        else:
+                            error_message = "Thông tin không hợp lệ. Vui lòng kiểm tra lại các trường đã nhập."
+                    elif status_code == 401:
+                        error_message = "Phiên đăng nhập của bạn đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại."
                     elif status_code == 403:
-                        error_type = "PERMISSION_ERROR"
-                        suggestion = "Bạn không có quyền truy cập tài nguyên này. Vui lòng kiểm tra quyền của bạn."
+                        error_message = "Bạn không có quyền thực hiện thao tác này. Vui lòng kiểm tra quyền của bạn hoặc liên hệ quản trị viên."
                     elif status_code == 404:
-                        error_type = "NOT_FOUND_ERROR"
-                        suggestion = f"Không tìm thấy tài nguyên tại {path}. Vui lòng kiểm tra lại ID hoặc đường dẫn."
+                        error_message = "Không tìm thấy tài nguyên yêu cầu. Có thể đường dẫn không đúng hoặc tài nguyên đã bị xóa."
                     elif status_code == 500:
-                        error_type = "SERVER_ERROR"
-                        suggestion = "Lỗi từ phía server. Vui lòng thử lại sau hoặc liên hệ hỗ trợ."
+                        error_message = "Hệ thống đang gặp sự cố. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục."
+                    else:
+                        error_message = backend_msg if backend_msg else "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau."
         except:
-            pass
+            error_message = "Đã xảy ra lỗi khi kết nối đến hệ thống. Vui lòng thử lại sau."
         
-        raise ValueError(f"Backend API error ({error_type}): {error_detail}. {suggestion}")
+        if not error_message:
+            error_message = "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau."
+        
+        raise ValueError(error_message)
     except requests.exceptions.RequestException as e:
-        raise ValueError(f"Lỗi kết nối khi gọi backend: {str(e)}. URL: {url}. Vui lòng kiểm tra kết nối mạng.")
+        raise ValueError("Không thể kết nối đến hệ thống. Vui lòng kiểm tra kết nối mạng và thử lại sau.")
 
 
 def _get_internal(path: str, params: Optional[dict] = None, user_token: Optional[str] = None):
@@ -164,39 +195,56 @@ def get(path: str, params: Optional[dict] = None, user_token: Optional[str] = No
     try:
         return _retry_request(_get_internal, path, params=params, user_token=user_token)
     except requests.exceptions.Timeout as e:
-        raise ValueError(f"Kết nối đến backend quá thời gian chờ (timeout). URL: {url}. Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.")
+        raise ValueError("Kết nối đến hệ thống quá thời gian chờ. Vui lòng kiểm tra kết nối mạng hoặc thử lại sau.")
     except requests.exceptions.ConnectionError as e:
-        raise ValueError(f"Không thể kết nối đến backend tại {base}. Vui lòng kiểm tra xem backend có đang chạy không. Chi tiết: {str(e)}")
+        raise ValueError("Không thể kết nối đến hệ thống. Vui lòng kiểm tra xem hệ thống có đang hoạt động không hoặc thử lại sau.")
     except requests.exceptions.HTTPError as e:
         # Lấy thông tin chi tiết từ response body nếu có
-        error_detail = str(e)
-        error_type = "HTTP_ERROR"
+        error_message = ""
         suggestion = "Vui lòng kiểm tra lại thông tin yêu cầu hoặc thử lại sau."
         
         try:
             if e.response is not None:
                 error_body = e.response.json() if e.response.content else {}
                 if isinstance(error_body, dict):
-                    error_msg = error_body.get("message") or error_body.get("error") or str(error_body)
-                    error_detail = f"{error_msg} (HTTP {e.response.status_code})"
+                    backend_msg = error_body.get("message") or error_body.get("error") or ""
                     
-                    # Phân loại lỗi và đưa ra gợi ý cụ thể
+                    # Phân loại lỗi và đưa ra thông báo tự nhiên
                     status_code = e.response.status_code
-                    if status_code == 401:
-                        error_type = "AUTHENTICATION_ERROR"
-                        suggestion = "Token xác thực không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại."
+                    if status_code == 400:
+                        # Lỗi validation - hiển thị message từ backend một cách tự nhiên
+                        if backend_msg:
+                            if "Ảnh sự kiện là bắt buộc" in backend_msg or "image" in backend_msg.lower():
+                                error_message = "Vui lòng cung cấp ảnh sự kiện hoặc để hệ thống tự động sử dụng ảnh mặc định."
+                            elif "ngày" in backend_msg.lower() or "date" in backend_msg.lower():
+                                if "Ngày kết thúc" in backend_msg:
+                                    error_message = "Ngày kết thúc phải sau ngày bắt đầu. Vui lòng kiểm tra lại ngày tháng."
+                                elif "phải là ngày hôm nay" in backend_msg:
+                                    error_message = "Ngày bắt đầu và ngày kết thúc phải là ngày hôm nay hoặc trong tương lai. Vui lòng chọn lại ngày phù hợp."
+                                else:
+                                    error_message = "Ngày tháng không hợp lệ. Vui lòng kiểm tra lại định dạng ngày tháng (ví dụ: 2025-05-06)."
+                            elif "missing" in backend_msg.lower() or "required" in backend_msg.lower() or "thiếu" in backend_msg.lower():
+                                error_message = "Thiếu thông tin bắt buộc. Vui lòng cung cấp đầy đủ thông tin."
+                            else:
+                                error_message = backend_msg if backend_msg else "Thông tin không hợp lệ. Vui lòng kiểm tra lại các trường đã nhập."
+                        else:
+                            error_message = "Thông tin không hợp lệ. Vui lòng kiểm tra lại các trường đã nhập."
+                    elif status_code == 401:
+                        error_message = "Phiên đăng nhập của bạn đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại."
                     elif status_code == 403:
-                        error_type = "PERMISSION_ERROR"
-                        suggestion = "Bạn không có quyền truy cập tài nguyên này. Vui lòng kiểm tra quyền của bạn."
+                        error_message = "Bạn không có quyền thực hiện thao tác này. Vui lòng kiểm tra quyền của bạn hoặc liên hệ quản trị viên."
                     elif status_code == 404:
-                        error_type = "NOT_FOUND_ERROR"
-                        suggestion = f"Không tìm thấy tài nguyên tại {path}. Vui lòng kiểm tra lại ID hoặc đường dẫn."
+                        error_message = "Không tìm thấy tài nguyên yêu cầu. Có thể đường dẫn không đúng hoặc tài nguyên đã bị xóa."
                     elif status_code == 500:
-                        error_type = "SERVER_ERROR"
-                        suggestion = "Lỗi từ phía server. Vui lòng thử lại sau hoặc liên hệ hỗ trợ."
+                        error_message = "Hệ thống đang gặp sự cố. Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục."
+                    else:
+                        error_message = backend_msg if backend_msg else "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau."
         except:
-            pass
+            error_message = "Đã xảy ra lỗi khi kết nối đến hệ thống. Vui lòng thử lại sau."
         
-        raise ValueError(f"Backend API error ({error_type}): {error_detail}. {suggestion}")
+        if not error_message:
+            error_message = "Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau."
+        
+        raise ValueError(error_message)
     except requests.exceptions.RequestException as e:
-        raise ValueError(f"Lỗi kết nối khi gọi backend: {str(e)}. URL: {url}. Vui lòng kiểm tra kết nối mạng.")
+        raise ValueError("Không thể kết nối đến hệ thống. Vui lòng kiểm tra kết nối mạng và thử lại sau.")
