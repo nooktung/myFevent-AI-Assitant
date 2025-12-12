@@ -15,7 +15,6 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.append(CURRENT_DIR)
 
-from tools.events import create_event_tool
 from tools.epics import ai_generate_epics_for_event_tool
 from tools.tasks import ai_generate_tasks_for_epic_tool
 from agent_system_prompt import AGENT_SYSTEM_PROMPT
@@ -26,67 +25,6 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # 1) KHAI BÁO TOOLS
 # =========================
 TOOLS = [
-    # ---- Tool tạo event ----
-    {
-        "type": "function",
-        "function": {
-            "name": "create_event",
-            "description": "Tạo một event mới trên hệ thống myFEvent (Node backend).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "Tên sự kiện."
-                    },
-                    "description": {
-                        "type": "string",
-                        "description": (
-                            "Mô tả chi tiết sự kiện (2–5 câu): mục tiêu, đối tượng tham gia, quy mô, "
-                            "có livestream không, phần chính của chương trình,... "
-                            "Thông tin này sẽ dùng cho RAG để sinh EPIC/TASK."
-                        )
-                    },
-                    "organizerName": {
-                        "type": "string",
-                        "description": "Tên CLB/đơn vị tổ chức."
-                    },
-                    "eventStartDate": {
-                        "type": "string",
-                        "description": "Ngày bắt đầu diễn ra sự kiện (D-Day - ngày đầu tiên sự kiện chính thức diễn ra), định dạng yyyy-mm-dd."
-                    },
-                    "eventEndDate": {
-                        "type": "string",
-                        "description": "Ngày kết thúc diễn ra sự kiện (ngày cuối cùng sự kiện chính thức diễn ra), định dạng yyyy-mm-dd."
-                    },
-                    "location": {
-                        "type": "string",
-                        "description": "Địa điểm tổ chức (phòng, toà nhà, cơ sở, ...)."
-                    },
-                    "type": {
-                        "type": "string",
-                        "enum": ["public", "private"],
-                        "description": "Loại sự kiện."
-                    },
-                    "images": {
-                        "type": "array",
-                        "description": "Danh sách URL ảnh sự kiện (có thể để [] ban đầu).",
-                        "items": {"type": "string"}
-                    }
-                },
-                "required": [
-                    "name",
-                    "description",      # ⚠ bắt buộc để RAG có đủ ngữ cảnh
-                    "organizerName",
-                    "eventStartDate",
-                    "eventEndDate",
-                    "location",
-                    "type"
-                ]
-            }
-        },
-    },
-
     # ---- Tool sinh EPIC bằng RAG ----
     {
         "type": "function",
@@ -172,9 +110,7 @@ TOOLS = [
 # 2) MAP TÊN TOOL -> HÀM PYTHON
 # =========================
 def call_tool(name: str, arguments: Dict[str, Any], user_token: str) -> Dict[str, Any]:
-    if name == "create_event":
-        return create_event_tool(arguments, user_token=user_token)
-    elif name == "ai_generate_epics_for_event":
+    if name == "ai_generate_epics_for_event":
         return ai_generate_epics_for_event_tool(arguments, user_token=user_token)
     elif name == "ai_generate_tasks_for_epic":
         return ai_generate_tasks_for_epic_tool(arguments, user_token=user_token)

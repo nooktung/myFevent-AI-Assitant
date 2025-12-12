@@ -13,7 +13,7 @@ PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
-from tools.events import create_event_tool
+# from tools.events import create_event_tool  # Removed - tool not implemented
 from tools.epics import ai_generate_epics_for_event_tool
 from tools.tasks import ai_generate_tasks_for_epic_tool
 

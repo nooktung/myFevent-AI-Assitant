@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from agent_system_prompt import AGENT_SYSTEM_PROMPT
-from tools.events import create_event_tool
 from tools.event_detail import get_event_detail_for_ai_tool
 from tools.epics import ai_generate_epics_for_event_tool
 from tools.tasks import ai_generate_tasks_for_epic_tool
@@ -18,51 +17,6 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ====== TOOLS DEFINITION CHO OPENAI ======
 TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "create_event",
-            "description": "Tạo một event mới trên hệ thống myFEvent (Node backend).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "description": {
-                        "type": "string",
-                        "description": "Mô tả chi tiết sự kiện, dùng cho RAG sinh EPIC/TASK."
-                    },
-                    "organizerName": {"type": "string"},
-                    "eventStartDate": {
-                        "type": "string",
-                        "description": "Ngày bắt đầu diễn ra sự kiện (D-Day - ngày đầu tiên sự kiện chính thức diễn ra), định dạng yyyy-mm-dd. Đây là mốc tham chiếu để tính toán thời gian cho các công việc chuẩn bị (offset_days_from_event < 0) và hậu kỳ (offset_days_from_event > 0)."
-                    },
-                    "eventEndDate": {
-                        "type": "string",
-                        "description": "Ngày kết thúc diễn ra sự kiện (ngày cuối cùng sự kiện chính thức diễn ra), định dạng yyyy-mm-dd."
-                    },
-                    "location": {"type": "string"},
-                    "type": {
-                        "type": "string",
-                        "enum": ["public", "private"],
-                        "description": "Loại sự kiện: public hoặc private"
-                    },
-                    "images": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "Danh sách URL ảnh sự kiện, có thể để []"
-                    }
-                },
-                "required": [
-                    "name",
-                    "organizerName",
-                    "eventStartDate",
-                    "eventEndDate",
-                    "location",
-                    "type"
-                ]
-            }
-        },
-    },
     {
         "type": "function",
         "function": {
@@ -180,8 +134,6 @@ def call_tool(name: str, arguments: Dict[str, Any], user_token: str) -> Dict[str
 
     - user_token: JWT (myFEvent) để Node client (tools/*.py) gọi backend Node.
     """
-    if name == "create_event":
-        return create_event_tool(arguments, user_token=user_token)
     if name == "get_event_detail_for_ai":
         return get_event_detail_for_ai_tool(arguments, user_token=user_token)
     if name == "ai_generate_epics_for_event":

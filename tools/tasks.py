@@ -39,10 +39,10 @@ Yêu cầu:
 - Các task phải đủ rõ ràng để có thể giao cho thành viên hoặc ban thực hiện.
 - Không tạo quá nhiều task vặt vãnh; ưu tiên những bước chính, có thể gom các việc nhỏ vào một task lớn.
 - Sắp xếp task theo logic thời gian và phụ thuộc (depends_on).
-- Dùng offset_days_from_event để thể hiện mốc thời gian tương đối so với D-Day (ngày bắt đầu diễn ra sự kiện):
-  - offset_days_from_event < 0  → công việc trước D-Day (chuẩn bị),
-  - offset_days_from_event = 0  → công việc diễn ra trong D-Day,
-  - offset_days_from_event > 0  → công việc sau D-Day (hậu kỳ).
+- Dùng offset_days_from_event để thể hiện mốc thời gian tương đối:
+  - offset_days_from_event < 0  → công việc trước ngày bắt đầu sự kiện,
+  - offset_days_from_event = 0  → công việc diễn ra trong ngày bắt đầu sự kiện,
+  - offset_days_from_event > 0  → công việc sau ngày bắt đầu sự kiện.
 
 Schema output BẮT BUỘC (JSON duy nhất):
 
@@ -68,8 +68,8 @@ Giải thích các field:
   - "low": việc phụ, có thể làm sau.
 - can_parallel: true nếu task có thể làm song song với các task khác, false nếu cần làm theo thứ tự.
 - depends_on: danh sách title của các task cần hoàn thành trước (cùng EPIC này). Nếu không có phụ thuộc thì để [].
-- offset_days_from_event: số ngày tương đối so với D-Day (ngày bắt đầu diễn ra sự kiện):
-  - Ví dụ: -14 (2 tuần trước D-Day), -7 (1 tuần trước D-Day), 0 (D-Day - ngày diễn ra sự kiện), 1 (ngày sau D-Day để tổng kết).
+- offset_days_from_event: số ngày tương đối so với ngày bắt đầu sự kiện:
+  - Ví dụ: -14 (2 tuần trước), -7 (1 tuần trước), 0 (ngày diễn ra sự kiện), 1 (ngày sau sự kiện để tổng kết).
 
 Chỉ trả về JSON đúng schema trên, KHÔNG thêm giải thích, không thêm text ngoài JSON.
 """
@@ -117,7 +117,7 @@ def ai_generate_tasks_for_epic_tool(
       - epicTitle: tên EPIC (string, bắt buộc)
       - department: tên ban phụ trách EPIC (string, optional – chỉ để context cho LLM)
       - eventDescription: mô tả sự kiện (string, bắt buộc để RAG hiểu context)
-      - eventStartDate: "yyyy-mm-dd" (string, optional nhưng nên có để tính offset). Đây là D-Day - ngày bắt đầu diễn ra sự kiện, dùng làm mốc tham chiếu để tính offset_days_from_event.
+      - eventStartDate: "yyyy-mm-dd" (string, optional nhưng nên có để tính offset)
 
     Pipeline:
       1) Gọi RAG: lấy task_template + task_snapshot phù hợp với eventDescription + epicTitle + department.
@@ -169,7 +169,7 @@ def ai_generate_tasks_for_epic_tool(
             "role": "user",
             "content": (
                 f"Mô tả sự kiện:\n{event_description}\n\n"
-                f"D-Day - Ngày bắt đầu diễn ra sự kiện (eventStartDate): {event_start_date}\n"
+                f"Ngày bắt đầu sự kiện (eventStartDate): {event_start_date}\n"
                 f"Phòng ban (department): {department}\n"
                 f"EPIC:\n  - Title: {epic_title}\n  - EpicId: {epic_id}\n\n"
                 "TASK_TEMPLATE & SNAPSHOT từ KB:\n"
