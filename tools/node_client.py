@@ -8,6 +8,9 @@ import requests
 load_dotenv()
 
 MYFEVENT_BASE_URL = os.getenv("MYFEVENT_BASE_URL", "http://localhost:5000/api")
+# Đảm bảo base URL luôn trỏ tới prefix `/api` của backend Node, tránh lỗi thiếu `/api`
+if not MYFEVENT_BASE_URL.rstrip("/").endswith("/api"):
+    MYFEVENT_BASE_URL = MYFEVENT_BASE_URL.rstrip("/") + "/api"
 SERVICE_API_KEY = os.getenv("MYFEVENT_API_KEY", "")
 
 ...
