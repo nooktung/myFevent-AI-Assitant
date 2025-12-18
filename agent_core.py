@@ -183,12 +183,20 @@ def run_agent_turn(
     collected_plans: List[Dict[str, Any]] = []
 
     # 2) Loop: model ↔ tools cho đến khi model trả về final answer (không còn tool_calls)
-    while True:
+    # Giới hạn số lần lặp để tránh timeout (max 10 tool calls)
+    max_iterations = 10
+    iteration = 0
+    
+    while iteration < max_iterations:
+        iteration += 1
+        print(f"[AGENT] Iteration {iteration}/{max_iterations}")
+        
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
             tools=TOOLS,
             tool_choice="auto",
+            timeout=60.0,  # Timeout 60s cho mỗi LLM call
         )
 
         msg = response.choices[0].message
@@ -197,10 +205,22 @@ def run_agent_turn(
         if not msg.tool_calls:
             assistant_reply = msg.content or ""
             messages.append({"role": "assistant", "content": assistant_reply})
+            print(f"[AGENT] Final answer after {iteration} iterations, collected {len(collected_plans)} plans")
             return {
                 "assistant_reply": assistant_reply,
                 "messages": messages,
                 # Trả thêm danh sách kế hoạch để FE/Node có thể cho user preview & apply
+                "plans": collected_plans,
+            }
+        
+        # Nếu đạt max iterations mà vẫn còn tool_calls, trả về với warning
+        if iteration >= max_iterations:
+            print(f"[AGENT] WARNING: Reached max iterations ({max_iterations}), stopping")
+            assistant_reply = "Tôi đã xử lý yêu cầu của bạn nhưng có thể chưa hoàn tất do giới hạn số lần xử lý. Vui lòng thử lại với yêu cầu cụ thể hơn."
+            messages.append({"role": "assistant", "content": assistant_reply})
+            return {
+                "assistant_reply": assistant_reply,
+                "messages": messages,
                 "plans": collected_plans,
             }
 

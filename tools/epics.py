@@ -88,9 +88,10 @@ def ai_generate_epics_for_event_tool(
         raise ValueError("eventDescription is required")
 
     # 1) RAG: lấy epic_template + case tương tự
+    # Giảm top_k từ 12 xuống 6 để tăng tốc độ RAG query
     query = f"{event_description} departments: {', '.join(departments)} epic_template"
-    kb_chunks = retrieve_chunks(query, top_k=12) or []
-    print(f"[DEBUG] RAG – retrieved {len(kb_chunks)} KB chunks for EPIC planning.")
+    kb_chunks = retrieve_chunks(query, top_k=6) or []
+    print(f"[DEBUG] RAG – retrieved {len(kb_chunks)} KB chunks for EPIC planning (top_k=6 for faster query).")
 
     kb_text_parts: List[str] = []
     for idx, c in enumerate(kb_chunks):

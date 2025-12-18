@@ -37,17 +37,17 @@ def _build_headers(
     return headers
 
 
-def post(path: str, json: dict, user_token: Optional[str] = None):
+def post(path: str, json: dict, user_token: Optional[str] = None, timeout: int = 30):
     base = MYFEVENT_BASE_URL.rstrip("/")
     url = f"{base}/{path.lstrip('/')}"
-    resp = requests.post(url, json=json, headers=_build_headers(user_token=user_token))
+    resp = requests.post(url, json=json, headers=_build_headers(user_token=user_token), timeout=timeout)
     resp.raise_for_status()
     return resp.json()
 
 
-def get(path: str, params: Optional[dict] = None, user_token: Optional[str] = None):
+def get(path: str, params: Optional[dict] = None, user_token: Optional[str] = None, timeout: int = 30):
     base = MYFEVENT_BASE_URL.rstrip("/")
     url = f"{base}/{path.lstrip('/')}"
-    resp = requests.get(url, params=params, headers=_build_headers(user_token=user_token))
+    resp = requests.get(url, params=params, headers=_build_headers(user_token=user_token), timeout=timeout)
     resp.raise_for_status()
     return resp.json()
