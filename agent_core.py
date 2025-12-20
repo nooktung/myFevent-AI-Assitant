@@ -127,6 +127,108 @@ TOOLS = [
 ]
 
 
+# ====== KIỂM TRA CÂU HỎI CÓ LIÊN QUAN ĐẾN SỰ KIỆN KHÔNG ======
+def is_event_related(message: str) -> bool:
+    """
+    Kiểm tra xem câu hỏi có liên quan đến tổ chức/quản lý sự kiện không.
+    Trả về True nếu liên quan, False nếu không liên quan.
+    """
+    if not message or not message.strip():
+        return False
+    
+    message_lower = message.lower().strip()
+    
+    # Từ khóa liên quan đến sự kiện
+    event_keywords = [
+        'sự kiện', 'su kien', 'event', 'tổ chức', 'to chuc',
+        'tạo sự kiện', 'tao su kien', 'create event',
+        'công việc', 'cong viec', 'task', 'epic', 'công việc lớn',
+        'ban', 'phòng ban', 'phong ban', 'department',
+        'thành viên', 'thanh vien', 'member',
+        'trưởng ban', 'truong ban', 'hod', 'hooc',
+        'lịch', 'lich', 'calendar', 'schedule',
+        'rủi ro', 'rui ro', 'risk',
+        'ngân sách', 'ngan sach', 'budget', 'chi phí', 'chi phi', 'expense',
+        'cột mốc', 'cot moc', 'milestone',
+        'địa điểm', 'dia diem', 'venue', 'location',
+        'ngày', 'ngay', 'date', 'thời gian', 'thoi gian',
+        'tổ chức sự kiện', 'to chuc su kien', 'organize event',
+        'quản lý sự kiện', 'quan ly su kien', 'manage event',
+        'myfevent', 'myf event'
+    ]
+    
+    # Từ khóa KHÔNG liên quan đến sự kiện (các câu hỏi chung chung)
+    non_event_keywords = [
+        '1+1', '2+2', 'tính toán', 'tinh toan', 'calculate', 'math',
+        'hdpe', 'nhựa', 'plastic', 'polyethylene',
+        'vui không', 'vui khong', 'khỏe không', 'khoe khong',
+        'kể chuyện', 'ke chuyen', 'tell story',
+        'lịch sử', 'lich su', 'history',
+        'địa lý', 'dia ly', 'geography',
+        'việt nam', 'viet nam', 'vietnam',
+        'học', 'hoc', 'learn', 'study',
+        'tin tức', 'tin tuc', 'news',
+        'thời tiết', 'thoi tiet', 'weather',
+        'ai là gì', 'ai la gi', 'what is ai',
+        'blockchain', 'crypto', 'bitcoin'
+    ]
+    
+    # Kiểm tra các từ khóa không liên quan trước (ưu tiên)
+    for keyword in non_event_keywords:
+        if keyword in message_lower:
+            # Nếu có từ khóa không liên quan, kiểm tra xem có từ khóa sự kiện không
+            # Nếu không có từ khóa sự kiện nào, thì không liên quan
+            has_event_keyword = any(ek in message_lower for ek in event_keywords)
+            if not has_event_keyword:
+                return False
+    
+    # Kiểm tra các từ khóa liên quan đến sự kiện
+    for keyword in event_keywords:
+        if keyword in message_lower:
+            return True
+    
+    # Nếu không có từ khóa nào, dùng LLM để phân loại (fallback)
+    try:
+        classification_prompt = f"""Bạn là một hệ thống phân loại câu hỏi. Nhiệm vụ của bạn là xác định xem câu hỏi sau có liên quan đến TỔ CHỨC VÀ QUẢN LÝ SỰ KIỆN không.
+
+Câu hỏi: "{message}"
+
+Các câu hỏi LIÊN QUAN đến sự kiện bao gồm:
+- Tạo sự kiện mới
+- Tạo công việc (task) và Công việc lớn (epic) cho sự kiện
+- Tra cứu thông tin về sự kiện (thành viên, ban, lịch, rủi ro, cột mốc)
+- Quản lý và tổ chức sự kiện
+- Các câu hỏi khác liên quan TRỰC TIẾP đến chức năng của hệ thống quản lý sự kiện
+
+Các câu hỏi KHÔNG LIÊN QUAN bao gồm:
+- Toán học, tính toán
+- Kiến thức chung (HDPE là gì, lịch sử, địa lý)
+- Khoa học, công nghệ không liên quan
+- Giáo dục, học thuật
+- Tin tức, thời sự
+- Cảm xúc, trò chuyện chung
+
+Trả lời CHỈ bằng một từ: "YES" nếu liên quan đến sự kiện, "NO" nếu không liên quan."""
+        
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "Bạn là một hệ thống phân loại câu hỏi. Trả lời chỉ bằng YES hoặc NO."},
+                {"role": "user", "content": classification_prompt}
+            ],
+            temperature=0,
+            max_tokens=10,
+            timeout=10.0,
+        )
+        
+        result = response.choices[0].message.content.strip().upper()
+        return result == "YES"
+    except Exception as e:
+        print(f"[AGENT] Error in is_event_related classification: {e}")
+        # Nếu lỗi, mặc định cho phép (để tránh chặn nhầm)
+        return True
+
+
 # ====== MAP TÊN TOOL → HÀM PYTHON THẬT ======
 def call_tool(name: str, arguments: Dict[str, Any], user_token: str) -> Dict[str, Any]:
     """
@@ -173,6 +275,39 @@ def run_agent_turn(
       - Lưu lại lịch sử cần thiết vào Mongo (ConversationHistory),
       - Gửi assistant_reply lại cho frontend.
     """
+    # 0) KIỂM TRA CÂU HỎI CÓ LIÊN QUAN ĐẾN SỰ KIỆN KHÔNG (BẮT BUỘC)
+    # Lấy tin nhắn user cuối cùng từ history
+    last_user_message = None
+    if history_messages:
+        for msg in reversed(history_messages):
+            if msg.get("role") == "user":
+                last_user_message = msg.get("content", "")
+                break
+    
+    # Nếu có tin nhắn user, kiểm tra xem có liên quan đến sự kiện không
+    if last_user_message:
+        if not is_event_related(last_user_message):
+            # Câu hỏi không liên quan → trả về ngay lập tức với câu từ chối
+            rejection_message = "Xin lỗi, tôi không thể giải đáp câu hỏi này. Tôi chỉ có thể hỗ trợ các câu hỏi liên quan đến việc tổ chức và quản lý sự kiện mà thôi."
+            suggestion = "Bạn có muốn tôi giúp bạn tạo sự kiện mới hoặc quản lý sự kiện hiện có không?"
+            
+            # Build messages để lưu vào history
+            messages: List[Dict[str, Any]] = [
+                {"role": "system", "content": AGENT_SYSTEM_PROMPT},
+            ]
+            messages.extend(history_messages or [])
+            messages.append({
+                "role": "assistant",
+                "content": f"{rejection_message} {suggestion}"
+            })
+            
+            print(f"[AGENT] Rejected non-event question: {last_user_message[:50]}...")
+            return {
+                "assistant_reply": f"{rejection_message} {suggestion}",
+                "messages": messages,
+                "plans": [],
+            }
+    
     # 1) Build messages cho OpenAI: prepend system prompt
     messages: List[Dict[str, Any]] = [
         {"role": "system", "content": AGENT_SYSTEM_PROMPT},
