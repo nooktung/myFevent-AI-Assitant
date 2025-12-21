@@ -1,0 +1,206 @@
+[
+    {
+      "id": "pattern_teambuilding_extended",
+      "type": "event_pattern",
+      "event_type": "teambuilding",
+      "name": "Team Building – Gắn kết & phát triển đội nhóm",
+      "tags": [
+        "teambuilding",
+        "bonding",
+        "teamwork",
+        "outdoor_activity",
+        "club_internal_event"
+      ],
+      "club_hint": "Phù hợp cho CLB, đội nhóm dự án, ban tổ chức sự kiện hoặc tập thể sinh viên cần tăng gắn kết nội bộ.",
+      "difficulty": "medium",
+      "context": "Team Building là hoạt động nhằm tăng sự gắn kết, tinh thần đồng đội và khả năng phối hợp giữa các thành viên. Sự kiện thường bao gồm trò chơi tập thể, thử thách theo nhóm, hoạt động vận động hoặc dã ngoại. Quy mô phổ biến 30–150 người. Mục tiêu chính: xây dựng tinh thần teamwork, cải thiện giao tiếp, tạo kỷ niệm chung và nâng cao động lực làm việc nhóm.",
+      "epics": [
+        {
+          "epic_key": "activity_design",
+          "title": "Thiết kế nội dung & kịch bản team building",
+          "description": "Xây dựng kịch bản tổng thể, lựa chọn trò chơi và thử thách phù hợp mục tiêu sự kiện.",
+          "department": "program",
+          "phase": "pre_event",
+          "priority": "high",
+          "order_index": 1,
+          "tasks": [
+            {
+              "task_key": "prog_define_objectives",
+              "title": "Xác định mục tiêu team building",
+              "description": "Xác định trọng tâm chính: gắn kết, giao tiếp, lãnh đạo, giải trí hoặc giải tỏa căng thẳng.",
+              "priority": "high",
+              "order_index": 1,
+              "depends_on": [],
+              "can_parallel": true,
+              "suggested_offset_days": -25
+            },
+            {
+              "task_key": "prog_design_games",
+              "title": "Thiết kế trò chơi và thử thách nhóm",
+              "description": "Thiết kế các trò chơi theo nhóm, đảm bảo an toàn, phù hợp thể lực và số lượng người tham gia.",
+              "priority": "high",
+              "order_index": 2,
+              "depends_on": ["prog_define_objectives"],
+              "can_parallel": true,
+              "suggested_offset_days": -22
+            },
+            {
+              "task_key": "prog_prepare_rules",
+              "title": "Soạn luật chơi và tiêu chí tính điểm",
+              "description": "Viết rõ luật chơi, cách tính điểm, cách xử lý tình huống phát sinh.",
+              "priority": "medium",
+              "order_index": 3,
+              "depends_on": ["prog_design_games"],
+              "can_parallel": true,
+              "suggested_offset_days": -18
+            },
+            {
+              "task_key": "prog_rehearsal",
+              "title": "Chạy thử kịch bản chương trình",
+              "description": "Test thời lượng từng trò chơi, luồng di chuyển và phân công MC/điều phối.",
+              "priority": "medium",
+              "order_index": 4,
+              "depends_on": ["prog_prepare_rules"],
+              "can_parallel": false,
+              "suggested_offset_days": -12
+            }
+          ]
+        },
+        {
+          "epic_key": "logistics_location_setup",
+          "title": "Chuẩn bị địa điểm & hậu cần",
+          "description": "Đảm bảo không gian, trang thiết bị và điều kiện an toàn cho toàn bộ hoạt động.",
+          "department": "logistics",
+          "phase": "pre_event",
+          "priority": "high",
+          "order_index": 2,
+          "tasks": [
+            {
+              "task_key": "logi_select_location",
+              "title": "Chọn địa điểm team building",
+              "description": "Khảo sát và chọn địa điểm phù hợp: sân trường, công viên, bãi biển hoặc khu dã ngoại.",
+              "priority": "high",
+              "order_index": 1,
+              "depends_on": [],
+              "can_parallel": true,
+              "suggested_offset_days": -23
+            },
+            {
+              "task_key": "logi_prepare_equipment",
+              "title": "Chuẩn bị đạo cụ & vật dụng trò chơi",
+              "description": "Chuẩn bị bóng, dây, cờ đội, bảng tên, loa, mic và dụng cụ y tế cơ bản.",
+              "priority": "medium",
+              "order_index": 2,
+              "depends_on": ["logi_select_location"],
+              "can_parallel": true,
+              "suggested_offset_days": -15
+            },
+            {
+              "task_key": "logi_safety_check",
+              "title": "Kiểm tra an toàn & phương án dự phòng",
+              "description": "Kiểm tra mặt bằng, thời tiết, phương án thay thế nếu có sự cố.",
+              "priority": "high",
+              "order_index": 3,
+              "depends_on": ["logi_prepare_equipment"],
+              "can_parallel": false,
+              "suggested_offset_days": -7
+            }
+          ]
+        },
+        {
+          "epic_key": "participant_management",
+          "title": "Quản lý & điều phối người tham gia",
+          "description": "Thông báo, chia đội và hỗ trợ người tham gia trong suốt sự kiện.",
+          "department": "media",
+          "phase": "pre_event",
+          "priority": "medium",
+          "order_index": 3,
+          "tasks": [
+            {
+              "task_key": "media_event_announcement",
+              "title": "Thông báo kế hoạch team building",
+              "description": "Thông báo thời gian, địa điểm, trang phục, lịch trình và lưu ý an toàn.",
+              "priority": "medium",
+              "order_index": 1,
+              "depends_on": ["logi_select_location"],
+              "can_parallel": true,
+              "suggested_offset_days": -18
+            },
+            {
+              "task_key": "media_team_division",
+              "title": "Chia đội và phân công đội trưởng",
+              "description": "Chia đội ngẫu nhiên hoặc theo nhóm, chỉ định đội trưởng hỗ trợ điều phối.",
+              "priority": "medium",
+              "order_index": 2,
+              "depends_on": ["media_event_announcement"],
+              "can_parallel": true,
+              "suggested_offset_days": -7
+            }
+          ]
+        },
+        {
+          "epic_key": "event_execution",
+          "title": "Triển khai team building",
+          "description": "Tổ chức và điều phối các hoạt động trong ngày diễn ra sự kiện.",
+          "department": "operation",
+          "phase": "during_event",
+          "priority": "high",
+          "order_index": 4,
+          "tasks": [
+            {
+              "task_key": "op_opening",
+              "title": "Khai mạc & phổ biến luật chơi",
+              "description": "Giới thiệu chương trình, luật chơi, đội nhóm và quy định an toàn.",
+              "priority": "high",
+              "order_index": 1,
+              "depends_on": [],
+              "can_parallel": false,
+              "suggested_offset_days": 0
+            },
+            {
+              "task_key": "op_run_games",
+              "title": "Tổ chức các trò chơi team building",
+              "description": "Điều phối từng trò chơi, ghi nhận điểm số và xử lý sự cố phát sinh.",
+              "priority": "high",
+              "order_index": 2,
+              "depends_on": ["op_opening"],
+              "can_parallel": false,
+              "suggested_offset_days": 0
+            }
+          ]
+        },
+        {
+          "epic_key": "post_event_review",
+          "title": "Tổng kết & đánh giá sau sự kiện",
+          "description": "Đánh giá hiệu quả team building và rút kinh nghiệm.",
+          "department": "program",
+          "phase": "post_event",
+          "priority": "low",
+          "order_index": 5,
+          "tasks": [
+            {
+              "task_key": "post_feedback",
+              "title": "Thu thập phản hồi người tham gia",
+              "description": "Thu thập ý kiến về trò chơi, tổ chức và mức độ hài lòng.",
+              "priority": "low",
+              "order_index": 1,
+              "depends_on": [],
+              "can_parallel": true,
+              "suggested_offset_days": 1
+            },
+            {
+              "task_key": "post_summary",
+              "title": "Họp tổng kết & rút kinh nghiệm",
+              "description": "Đánh giá điểm tốt, điểm cần cải thiện cho các hoạt động sau.",
+              "priority": "low",
+              "order_index": 2,
+              "depends_on": ["post_feedback"],
+              "can_parallel": false,
+              "suggested_offset_days": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+  
