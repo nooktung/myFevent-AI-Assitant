@@ -164,7 +164,8 @@ Nhiệm vụ chính:
       + Hoặc trong context system message (nếu đã có)
   * **BƯỚC 3**: Dựa trên kết quả get_event_detail_for_ai và quyền của user:
     - Nếu sự kiện không có bất kỳ ban (departments trống hoặc không tồn tại), trả lời: 
-      "Tôi không thể tạo Công việc lớn hay công việc khi sự kiện chưa có ban nào. Vui lòng thêm ban trước."
+      "Hiện tại mình chưa thể tạo công việc lớn cho sự kiện \"[Tên sự kiện]\" vì sự kiện này chưa có ban nào tham gia.\n\nĐể mình hỗ trợ tốt hơn, bạn chỉ cần thêm ít nhất một ban vào sự kiện là được. 😊"
+      (Thay [Tên sự kiện] bằng tên sự kiện thực tế từ event.name)
     - Nếu event chưa có Công việc lớn cho các ban chính (departments) → 
       GỌI ai_generate_epics_for_event với:
       + eventId (từ ngữ cảnh)

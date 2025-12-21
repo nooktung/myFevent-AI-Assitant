@@ -423,7 +423,10 @@ def run_agent_turn(
                     elif tool_name == "ai_generate_tasks_for_epic":
                         suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, epicId, department, eventDescription, eventStartDate) và thử lại."
                     elif tool_name == "ai_generate_epics_for_event":
-                        suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, eventDescription, departments) và thử lại."
+                        if "không sinh được epic" in error_message.lower() or "epic nào" in error_message.lower():
+                            suggestion = "Sự kiện này chưa có ban nào tham gia. Bạn cần thêm ít nhất một ban vào sự kiện trước khi tạo công việc lớn."
+                        else:
+                            suggestion = "Vui lòng kiểm tra lại các tham số đầu vào (eventId, eventDescription, departments) và thử lại."
                     else:
                         suggestion = "Vui lòng kiểm tra lại các tham số đầu vào và thử lại."
                 
